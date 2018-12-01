@@ -1,0 +1,85 @@
+`timescale 1ns / 1ps
+
+
+
+module top(
+        input clk,                      // for test bench: INPUNTS - REG
+        input reset,
+        output S0,                      // OUTPUTS - WIRE
+        output S1,
+        output S2,
+        output S3,
+        input color_pulse,
+        output [4:0] led,
+        output en
+
+    );
+    
+    assign S0=1, S1=1;
+    assign en=1;
+    wire [1:0] sw;
+    assign {S2,S3} = sw;
+    wire [19:0] freq;
+    wire enable_freq, enable_calc;
+    wire done_freq, done_calc;
+    wire [4:0] color;
+    wire [19:0] numerator;
+    wire [19:0] denominator;
+    wire [7:0]  percent;
+    
+    assign led[0] = (color==0)?1:0;     // red
+    assign led[1] = (color==1)?1:0;     // blue
+    assign led[2] = (color==2)?1:0;     // green 
+    assign led[3] = (color==3)?1:0;     // yellow
+    assign led[4] = (color==4)?1:0;
+    
+    
+    
+    freq_counter fr_counter (.clk(clk),
+                             .enable(enable_freq),
+                             .in(color_pulse),
+                             .freq(freq),
+                             .done(done_freq)); 
+    
+    
+    calc_per calc         (.clk(clk),
+                           .enable(enable_calc),
+                           .numerator(numerator),
+                           .denominator(denominator),
+                           .done(done_calc),
+                           .percent(percent));
+    
+    
+    
+    
+    
+      state_machine fsm (.clk(clk),
+                         .done_freq(done_freq),
+                         .done_calc(done_calc),
+                         .enable_freq(enable_freq),
+                         .enable_calc(enable_calc),
+                         .freq(freq),
+                         .color(color),
+                         .percent(percent),                                
+                         .sw(sw),
+                         .numerator(numerator),
+                         .denominator(denominator));
+    
+    
+    
+    
+//    state_machine fsm (.clk(clk),
+//                       .done_freq(done_freq),
+//                       .done_calc(done_calc),
+                       
+//                       .freq(freq),
+//                       .percent(percent),
+                       
+//                       .enable_freq(enable_freq),
+//                       .enable_calc(enable_calc),
+//                       .color(color),
+//                       .sw(sw),
+//                       .numerator(numerator),
+//                       .denominator(denominator));
+    
+endmodule
